@@ -87,6 +87,9 @@ kubectl --context=federation apply -f ./deployment/traefik.yaml
 ```
 
 # Launch Ingress on each cluster
+
+```
 kubectl --context=google apply -f ./deployment/ingress.yaml
 kubectl --context=aws apply -f ./deployment/ingress.yaml
 kubectl --context=azure apply -f ./deployment/ingress.yaml
+```
