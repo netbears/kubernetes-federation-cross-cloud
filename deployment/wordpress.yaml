@@ -1,0 +1,65 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wordpress
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      tier: frontend
+      type: web
+      name: wordpress
+  template:
+    metadata:
+      labels:
+        tier: frontend
+        type: web
+        name: wordpress
+    spec:
+      containers:
+      - name: wordpress
+        image: wordpress:latest
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: dbcluster
+        - name: WORDPRESS_DB_USER
+          value: root
+        - name: WORDPRESS_DB_PASSWORD
+          value: root
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        - name: WORDPRESS_TABLE_PREFIX
+          value: wp
+        - name: WORDPRESS_AUTH_KEY
+          value: aa6sbVcunkdx2utelIefgVhijzkwlq1aZ4mn1yHop5qraZsA4toOCzuU(YvR6wx6q
+        - name: WORDPRESS_SECURE_AUTH_KEY
+          value: acsvbcgdlIKe5fYgjhizjkG0lI7tmno7pqrDEElsRLtuvwPJNxHH5yPzaFEb6ExN
+        - name: WORDPRESS_LOGGED_IN_KEY
+          value: Ela9WbmUa=cLde6aQfkr6a9GKhghqirqdjbkrtRelmnoXTpqrYss1itjEuzvQBNw
+        - name: WORDPRESS_NONCE_KEY
+          value: cabc8KETdef8PgjhXEhidjklImdIqGSnotpeQfBqFtFVqnrTcstI8mNvGRYuvuAo
+        - name: WORDPRESS_AUTH_SALT
+          value: haGbncdefBHgAfhi6yAjaklRmnkP1op2TNpsqx40VLwQgbwrstkHuvwfmGZhxxyV
+        - name: WORDPRESS_SECURE_AUTH_SALT
+          value: UEablmbOcdqefgghijzMPW6kklm37vNwOnoprqLcllrtstuBXGwBvIwaxsYZ9yWHl
+        - name: WORDPRESS_LOGGED_IN_SALT
+          value: RDDiMabGfo9czdoendqcFufgXshSgaIGihjokoldmFnAomjpAqQBrsttuVv7C4sp
+        - name: WORDPRESS_NONCE_SALT
+          value: a24dPbzlvVC3cdUNefgNhFicdjklYmnotnpl2qOrQWrTstEuUvGPDKwxy52zabcd
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: wordpress
+spec:
+  selector:
+    tier: frontend
+    type: web
+    name: wordpress
+  ports:
+  - protocol: TCP
+    targetPort: 80
+    port: 80
+    name: http

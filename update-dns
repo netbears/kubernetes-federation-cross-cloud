@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+
+sed -i "" "s/DOMAIN_NAME/$1/" cloudflare-dns.sh
+sed -i "" "s/NS1/$2/" cloudflare-dns.sh
+sed -i "" "s/NS2/$3/" cloudflare-dns.sh
+sed -i "" "s/NS3/$4/" cloudflare-dns.sh
+sed -i "" "s/NS4/$5/" cloudflare-dns.sh
+sed -i "" "s/USERNAME/$6/" cloudflare-dns.sh
+
+./cloudflare.sh

@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: whoami
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        tier: frontend
+        type: web
+        name: whoami
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - whoami
+            topologyKey: failure-domain.beta.kubernetes.io/region
+      containers:
+      - name: whoami
+        image: mmitrofan/whoami:latest
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: whoami
+spec:
+  selector:
+    tier: frontend
+    type: web
+    name: whoami
+  ports:
+  - protocol: TCP
+    targetPort: 80
+    port: 80
+    name: http

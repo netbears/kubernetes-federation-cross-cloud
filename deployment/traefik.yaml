@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+    name: traefik-ingress-lb
+    tier: edge
+    type: lb
+  ports:
+    - port: 80
+      name: http
+    - port: 443
+      name: https
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-console
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+    name: traefik-ingress-lb
+    tier: edge
+    type: lb
+  ports:
+    - port: 8080
+      name: webui
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-conf
+data:
+  traefik.toml: |
+    # traefik.toml
+    defaultEntryPoints = ["http","https"]
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"
+        [entryPoints.http.redirect]
+          entryPoint = "https"
+      [entryPoints.https]
+      address = ":443"
+        [entryPoints.https.tls]
+          [[entryPoints.https.tls.certificates]]
+          CertFile = "/ssl/devfest.netbears.com.crt"
+          KeyFile = "/ssl/devfest.netbears.com.key"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: traefik-ingress-controller
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+        tier: edge
+        type: lb
+    spec:
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: ssl
+          secret:
+            secretName: traefik-cert
+        - name: config
+          configMap:
+            name: traefik-conf
+      containers:
+        - image: traefik:v1.4.2-alpine
+          name: traefik-ingress-lb
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/ssl"
+              name: "ssl"
+            - mountPath: "/config"
+              name: "config"
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 443
+              name: https
+            - containerPort: 8080
+              name: status
+          args:
+            - --configfile=/config/traefik.toml
+            - --web
+            - --kubernetes
+            - --logLevel=DEBUG
