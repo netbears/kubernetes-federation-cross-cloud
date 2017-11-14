@@ -12,3 +12,9 @@ spec:
           - backend:
               serviceName: wordpress
               servicePort: 80
+    - host: www.devfest.netbears.com
+      http:
+        paths:
+          - backend:
+              serviceName: whoami
+              servicePort: 80

@@ -52,7 +52,17 @@ kubectl --context=federation create namespace "default"
 ### Launch database clusters
 
 ```
-kubectl --context=federation apply -f ./deployment/db.yaml
+kubectl --context=federation apply -f ./deployment/db-federation.yaml
+
+<realise PodSpec.affinity is not supported in federation context>
+
+<curse slowly...>
+
+<deploy database to each cluster separately>
+
+kubectl --context=aws apply -f ./deployment/db-cluster.yaml
+kubectl --context=azure apply -f ./deployment/db-cluster.yaml
+kubectl --context=google apply -f ./deployment/db-cluster.yaml
 ```
 
 ### Launch wordpress frontend
@@ -86,7 +96,23 @@ cd ../
 kubectl --context=federation apply -f ./deployment/traefik.yaml
 ```
 
-# Launch Ingress on each cluster
+### Launch Traefik Service on each cluster
+
+```
+(type = `LoadBalancer` is not yet fully supported across all clouds - only Google)
+
+kubectl --context=google apply -f ./deployment/traefik-lb.yaml
+kubectl --context=aws apply -f ./deployment/traefik-lb.yaml
+kubectl --context=azure apply -f ./deployment/traefik-lb.yaml
+```
+
+### Launch whoami reference to prove geolocation reference
+
+```
+kubectl --context=federation apply -f ./deployment/whoami.yaml
+```
+
+### Launch Ingress on each cluster
 
 ```
 kubectl --context=google apply -f ./deployment/ingress.yaml

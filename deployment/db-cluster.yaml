@@ -1,0 +1,142 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-primary
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        tier: backend
+        type: db
+        name: db-primary
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: type
+                operator: In
+                values:
+                - db
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - image: percona/percona-xtradb-cluster:5.6
+        name: db-primary
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        - name: CLUSTER_NAME
+          value: dbcluster
+        - name: XTRABACKUP_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+          name: mysql
+        - containerPort: 4444
+          name: stt-snp-trn
+        - containerPort: 4567
+          name: repl-trf
+        - containerPort: 4568
+          name: incr-st-trn
+      restartPolicy: Always
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: db-primary
+spec:
+  selector:
+    tier: backend
+    type: db
+    name: db-primary
+  ports:
+  - protocol: TCP
+    targetPort: 3306
+    port: 3306
+    name: mysql
+  - protocol: TCP
+    targetPort: 4444
+    port: 4444
+    name: stt-snp-trn
+  - protocol: TCP
+    targetPort: 4567
+    port: 4567
+    name: repl-trf
+  - protocol: TCP
+    targetPort: 4568
+    port: 4568
+    name: incr-st-trn
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: db-slave
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        tier: backend
+        type: db
+        name: db-slave
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: type
+                operator: In
+                values:
+                - db
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - image: percona/percona-xtradb-cluster:5.6
+        name: db-slave
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        - name: CLUSTER_NAME
+          value: dbcluster
+        - name: CLUSTER_JOIN
+          value: db-primary
+        - name: XTRABACKUP_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+          name: mysql
+        - containerPort: 4444
+          name: stt-snp-trn
+        - containerPort: 4567
+          name: repl-trf
+        - containerPort: 4568
+          name: incr-st-trn
+      restartPolicy: Always
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dbcluster
+spec:
+  selector:
+    tier: backend
+    type: db
+  ports:
+  - protocol: TCP
+    targetPort: 3306
+    port: 3306
+    name: mysql
+  - protocol: TCP
+    targetPort: 4444
+    port: 4444
+    name: stt-snp-trn
+  - protocol: TCP
+    targetPort: 4567
+    port: 4567
+    name: repl-trf
+  - protocol: TCP
+    targetPort: 4568
+    port: 4568
+    name: incr-st-trn

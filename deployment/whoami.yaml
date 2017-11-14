@@ -11,16 +11,6 @@ spec:
         type: web
         name: whoami
     spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: name
-                operator: In
-                values:
-                - whoami
-            topologyKey: failure-domain.beta.kubernetes.io/region
       containers:
       - name: whoami
         image: mmitrofan/whoami:latest
@@ -41,4 +31,3 @@ spec:
     targetPort: 80
     port: 80
     name: http
-  type: LoadBalancer

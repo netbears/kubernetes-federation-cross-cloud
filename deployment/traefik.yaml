@@ -1,39 +1,3 @@
-kind: Service
-apiVersion: v1
-metadata:
-  name: traefik-lb
-spec:
-  selector:
-    k8s-app: traefik-ingress-lb
-    tier: edge
-    type: lb
-  ports:
-  - protocol: TCP
-    targetPort: 80
-    port: 80
-    name: http
-  - protocol: TCP
-    targetPort: 443
-    port: 443
-    name: https
-  type: LoadBalancer
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: traefik-status
-spec:
-  selector:
-    k8s-app: traefik-ingress-lb
-    tier: edge
-    type: lb
-  ports:
-  - protocol: TCP
-    targetPort: 8080
-    port: 8080
-    name: webui
-  type: LoadBalancer
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
