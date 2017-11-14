@@ -139,3 +139,33 @@ kubectl --context=azure get nodes,pods,services,ing
 kubectl --context=google get nodes,pods,services,ing
 kubectl --context=aws get nodes,pods,services,ing
 ```
+
+
+### Increase replica size for web deployments
+```
+kubectl --context=federation scale deployment whoami --replicas=6
+kubectl --context=federation scale deployment traefik-ingress-controller --replicas=9
+kubectl --context=federation scale deployment wordpress --replicas=6
+```
+
+
+### Create Route53 records based on GeoLocation
+
+```
+
+#### Get LoadBalancer endpoints
+kubectl --context=azure get service traefik-lb
+kubectl --context=google get service traefik-lb
+kubectl --context=aws get service traefik-lb
+
+
+#### Test LoadBalancer endpoints
+curl -i --header 'Host: devfest.netbears.com' 'https://load_balancer_endpoint' --insecure
+```
+
+
+### Flush DNS cache (MacOS Siera or Later)
+
+```
+sudo killall -HUP mDNSResponder;sudo killall mDNSResponderHelper;sudo dscacheutil -flushcache
+``` (MacOS Siera or Later)
