@@ -90,7 +90,7 @@ spec:
               - key: name
                 operator: In
                 values:
-                - db-primary
+                - db-slave
             topologyKey: failure-domain.beta.kubernetes.io/region
       containers:
       - image: percona/percona-xtradb-cluster:5.6

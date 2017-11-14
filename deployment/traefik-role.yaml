@@ -3,12 +3,21 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: traefik
 rules:
-- apiGroups: [""]
-  resources: ["secrets","configmaps","nodes","nodes/proxy","services","endpoints","ingresses","ingresses/extensions","ingresses.extensions"]
+- apiGroups: ["","extensions"]
+  resources: ["configmaps","secrets","services","endpoints","ingresses","nodes","pods"]
   verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["create"]
+- apiGroups: ["extensions",""]
+  resources: ["ingresses","ingresses/status"]
+  verbs: ["get","update","create","list","patch","delete","watch"]
+- apiGroups: ["*",""]
+  resources: ["events","certificates","secrets"]
+  verbs: ["get","update","create","list","patch","watch"]
 ---
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
 metadata:
   name: traefik
 roleRef:
@@ -16,9 +25,12 @@ roleRef:
   kind: ClusterRole
   name: traefik
 subjects:
-- kind: ServiceAccount
+  - kind: ServiceAccount
+    name: traefik
+    namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
   name: traefik
-  namespace: default
-- kind: ServiceAccount
-  name: default
   namespace: default

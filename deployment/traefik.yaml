@@ -1,37 +1,37 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: traefik
-  labels:
-    k8s-app: traefik-ingress-lb
+  name: traefik-lb
 spec:
   selector:
     k8s-app: traefik-ingress-lb
-    name: traefik-ingress-lb
     tier: edge
     type: lb
   ports:
-    - port: 80
-      name: http
-    - port: 443
-      name: https
+  - protocol: TCP
+    targetPort: 80
+    port: 80
+    name: http
+  - protocol: TCP
+    targetPort: 443
+    port: 443
+    name: https
   type: LoadBalancer
 ---
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: traefik-console
-  labels:
-    k8s-app: traefik-ingress-lb
+  name: traefik-status
 spec:
   selector:
     k8s-app: traefik-ingress-lb
-    name: traefik-ingress-lb
     tier: edge
     type: lb
   ports:
-    - port: 8080
-      name: webui
+  - protocol: TCP
+    targetPort: 8080
+    port: 8080
+    name: webui
   type: LoadBalancer
 ---
 apiVersion: v1
@@ -60,16 +60,19 @@ metadata:
   name: traefik-ingress-controller
   labels:
     k8s-app: traefik-ingress-lb
+    tier: edge
+    type: lb
+    name: traefik-ingress-controller
 spec:
   replicas: 2
   template:
     metadata:
       labels:
         k8s-app: traefik-ingress-lb
-        name: traefik-ingress-lb
         tier: edge
         type: lb
     spec:
+      serviceAccountName: traefik
       terminationGracePeriodSeconds: 60
       volumes:
         - name: ssl
