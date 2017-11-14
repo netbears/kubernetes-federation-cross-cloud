@@ -28,7 +28,7 @@ metadata:
     type: lb
     name: traefik-ingress-controller
 spec:
-  replicas: 2
+  replicas: 3
   template:
     metadata:
       labels:

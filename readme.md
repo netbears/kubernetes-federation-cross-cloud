@@ -94,16 +94,7 @@ cd ../
 
 ```
 kubectl --context=federation apply -f ./deployment/traefik.yaml
-```
-
-### Launch Traefik Service on each cluster
-
-```
-(type = `LoadBalancer` is not yet fully supported across all clouds - only Google)
-
-kubectl --context=google apply -f ./deployment/traefik-lb.yaml
-kubectl --context=aws apply -f ./deployment/traefik-lb.yaml
-kubectl --context=azure apply -f ./deployment/traefik-lb.yaml
+kubectl --context=federation apply -f ./deployment/traefik-lb.yaml
 ```
 
 ### Launch whoami reference to prove geolocation reference
@@ -112,10 +103,39 @@ kubectl --context=azure apply -f ./deployment/traefik-lb.yaml
 kubectl --context=federation apply -f ./deployment/whoami.yaml
 ```
 
+### Launch Ingress on federation context
+
+```
+kubectl --context=federation apply -f ./deployment/ingress.yaml
+```
+
+### List resources on all clusters
+
+```
+kubectl --context=azure get nodes,pods,services,ing
+kubectl --context=google get nodes,pods,services,ing
+kubectl --context=aws get nodes,pods,services,ing
+```
+
+```
+<realise Ingress was only deployed to only one cloud provider>
+
+<curse slowly...>
+
+<delete ingress from federation context and deploy on each cluster instead>
+```
+
 ### Launch Ingress on each cluster
 
 ```
+kubectl --context=federation delete ing traefik
+
 kubectl --context=google apply -f ./deployment/ingress.yaml
-kubectl --context=aws apply -f ./deployment/ingress.yaml
 kubectl --context=azure apply -f ./deployment/ingress.yaml
+kubectl --context=aws apply -f ./deployment/ingress.yaml
+
+<list all resources again to be sure>
+kubectl --context=azure get nodes,pods,services,ing
+kubectl --context=google get nodes,pods,services,ing
+kubectl --context=aws get nodes,pods,services,ing
 ```
